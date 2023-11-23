@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="86efd69b-93e7-47be-9305-a9b04730cf05" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="flows-exampleFlow" doc:id="3bbe4617-1ee3-4758-a559-98d979c6fccd" >
+		<http:listener doc:name="Listener" doc:id="1f096af1-f62f-40c7-87eb-7e1bc8435086" config-ref="HTTP_Listener_config" path="flows"/>
+		<logger level="INFO" doc:name='"flow start log"' doc:id="15b1a7b3-4013-4b76-956a-b337ff7fe574" message='"flow start log"'/>
+		<set-variable value="5" doc:name=" keeping a value as 5" doc:id="7441f21d-894c-4076-aaa7-34d851ea51a0" variableName="a"/>
+		<set-variable value="10" doc:name="keeping b value as 10" doc:id="ffdfc731-2431-4be8-9c9b-7efa2ca12abe" variableName="b"/>
+		<flow-ref doc:name="Flow Reference" doc:id="aaaa134e-69d2-47f8-beaa-3b459e865701" name="additionflow"/>
+		<ee:transform doc:name="Transform Message" doc:id="2a3fd3cb-fa74-4912-8178-6296d5fa8130" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="addition" ><![CDATA[payload.addition]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="badb939a-d986-43ae-9d0e-7edc9618eb9b" name="Subtractionflow"/>
+		<ee:transform doc:name="Transform Message" doc:id="f00f0f93-a609-45c2-9e39-77297037b0b1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"addition": vars.addition,
+	"subtraction": payload.subtraction
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sub" ><![CDATA[payload.subtraction]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name='"end log"' doc:id="0936df83-365f-48a3-876d-37793afada64" message='"end log"'/>
+		<flow-ref doc:name="Flow Reference" doc:id="02654d20-8e89-4bc3-a2bd-4f1fddff59d9" name="multiplication"/>
+		<ee:transform doc:name="Transform Message" doc:id="d8fda375-6d78-470a-903c-8424750c494f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"addition": vars.addition,
+	"subtraction": vars.sub,
+	"multiplication": payload.multiplication
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="multiplication" doc:id="a12e4c7f-5753-4915-90b2-9066633bdf8c" >
+		<ee:transform doc:name="Transform Message" doc:id="498b667f-fd71-47cc-b092-da34cb735bee" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"multiplication": vars.a * vars.b
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<sub-flow name="additionflow" doc:id="4b8b6fc3-696c-4606-b685-52b8ee170add" >
+		<ee:transform doc:name="Transform Message" doc:id="29ddb64e-4a20-4985-a659-be498dfd71cb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"addition": vars.a + vars.b
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6b02337d-57cf-42c2-ad3a-c3c1415ed586" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="Subtractionflow" doc:id="a66ac5b9-371f-4f41-adaa-0cbaaf84f8e2" >
+		<ee:transform doc:name="Transform Message" doc:id="45b72885-0da4-478a-a284-e34029a4f5ae" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"subtraction": vars.a - vars.b
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8dc67b1e-3d9f-4387-9978-109266ccb6ca" message="#[payload]"/>
+	</sub-flow>
+</mule>
