@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_a12e4c7f_5753_4915_90b2_9066633bdf8c_Input_Payload = {|
+  addition: Any, 
+  subtraction: Any
+|}
+
